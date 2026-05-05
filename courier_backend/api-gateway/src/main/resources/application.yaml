@@ -1,0 +1,75 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+
+      discovery:
+        locator:
+          enabled: true
+      routes:
+        # 1. RUTAS PÚBLICAS
+        - id: auth-route
+          uri: lb://MS-AUTH
+          predicates:
+            - Path=/auth/**
+          filters:
+            - AuthenticationFilter
+
+        - id: tracking-public-route
+          uri: lb://MS-ORDERS
+          predicates:
+            - Path=/api/orders/tracking/**
+
+        - id: shipping-public-route
+          uri: lb://MS-SHIPPING
+          predicates:
+            - Path=/api/shipping/calcular/**
+
+        # 2. RUTAS PROTEGIDAS
+        - id: orders-protected-route
+          uri: lb://MS-ORDERS
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - AuthenticationFilter
+
+        - id: shipping-protected-route
+          uri: lb://MS-SHIPPING
+          predicates:
+            - Path=/api/shipping/**
+          filters:
+            - AuthenticationFilter
+
+        - id: notifications-route
+          uri: lb://MS-NOTIFICATIONS
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - AuthenticationFilter
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    fetch-registry: true
+    register-with-eureka: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.http.server.reactive: DEBUG

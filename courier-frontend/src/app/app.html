@@ -1,0 +1,7 @@
+<!-- src/app/app.html -->
+<div class="app-main">
+  <router-outlet></router-outlet>
+</div>
+
+<!-- Footer global: visible en todas MENOS /login y /dashboard -->
+<app-footer *ngIf="isFooterGlobalVisible"></app-footer>
